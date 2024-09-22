@@ -52,6 +52,7 @@ p.circle(x='UMAP1', y='UMAP2', source=df, size=10)
 st.bokeh_chart(p)
 
 st.header("Plotly Chart")
+
 import plotly.express as px
 
 # Create a DataFrame with UMAP results

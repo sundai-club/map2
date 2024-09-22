@@ -1,5 +1,8 @@
 streamlit
-bokeh==2.4.3
+bokeh
 pandas
 altair
 plotly
+numpy
+umap_learn
+matplotlib
