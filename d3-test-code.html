@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>D3 Scatterplot with Tooltips, Zoom, and Fixed Axes</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: black;
+      shape-rendering: crispEdges;
+    }
+    .dot {
+      fill: steelblue;
+      stroke: #000;
+    }
+    .tooltip {
+      position: absolute;
+      text-align: center;
+      padding: 6px;
+      background: lightsteelblue;
+      border: 1px solid #000;
+      border-radius: 4px;
+      pointer-events: none;
+    }
+  </style>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://d3js.org/d3-contour.v2.min.js"></script>
+</head>
+<body>
+
+  <h2>Scatterplot with Density Plot, Tooltips, Zoom, and Fixed Axes</h2>
+  <svg id="scatterplot" width="500" height="400"></svg>
+
+  <script>
+    // Set up the dimensions and margins
+    const width = 500;
+    const height = 400;
+    const margin = {top: 20, right: 30, bottom: 40, left: 40};
+
+    // Sample data for the scatterplot
+    const data = [
+      {x: 10, y: 20, size: Math.floor(Math.random() * 10) + 1, z: 3},
+      {x: 20, y: 34, size: Math.floor(Math.random() * 10) + 1, z: 7},
+      {x: 35, y: 45, size: Math.floor(Math.random() * 10) + 1, z: 2},
+      {x: 45, y: 67, size: Math.floor(Math.random() * 10) + 1, z: 9},
+      {x: 55, y: 78, size: Math.floor(Math.random() * 10) + 1, z: 5},
+      {x: 60, y: 90, size: Math.floor(Math.random() * 10) + 1, z: 1},
+      {x: 75, y: 80, size: Math.floor(Math.random() * 10) + 1, z: 8},
+      {x: 85, y: 100, size: Math.floor(Math.random() * 10) + 1, z: 4},
+      {x: 95, y: 120, size: Math.floor(Math.random() * 10) + 1, z: 6}
+    ];
+    const ocolor = d3.scaleOrdinal()
+      .domain([1, 2, 3, 4, 5, 6, 7, 8, 9])
+      .range(d3.schemeCategory10);  // D3's built-in color scheme
+
+    // Create scales for x and y axes
+    const x = d3.scaleLinear()
+      .domain([0, d3.max(data, d => d.x) + 10])
+      .range([margin.left, width - margin.right]);
+
+    const y = d3.scaleLinear()
+      .domain([0, d3.max(data, d => d.y) + 10])
+      .range([height - margin.bottom, margin.top]);
+
+    // Create an SVG element
+    const svg = d3.select("#scatterplot");
+
+    // Create a group for the density plot
+    const densityGroup = svg.append("g");
+
+    // Create density data
+    const densityData = d3.contourDensity()
+      .x(d => x(d.x))
+      .y(d => y(d.y))
+      .size([width, height])
+      .bandwidth(30)
+      (data);
+
+    // Color scale for density
+    const dcolor = d3.scaleSequential(d3.interpolateYlOrRd)
+      .domain([0, 5*d3.max(densityData, d => d.value)]);
+
+
+    // Add density contours
+    densityGroup.selectAll("path")
+      .data(densityData)
+      .enter().append("path")
+      .attr("d", d3.geoPath())
+      .attr("fill", d => dcolor(d.value))
+      .attr("opacity", 0.2);
+
+    // Tooltip setup
+    const tooltip = d3.select("body").append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 0);
+
+    // Add x-axis
+    const xAxisGroup = svg.append("g")
+      .attr("transform", `translate(0,${height - margin.bottom})`)
+      .attr("class", "axis")
+      .call(d3.axisBottom(x));
+
+    // Add y-axis
+    const yAxisGroup = svg.append("g")
+      .attr("transform", `translate(${margin.left},0)`)
+      .attr("class", "axis")
+      .call(d3.axisLeft(y));
+
+    // Create a group to contain the dots, which will be zoomed
+    const plotArea = svg.append("g");
+
+    // Create dots (scatter points)
+    const dots = plotArea.selectAll(".dot")
+      .data(data)
+      .enter().append("circle")
+      .attr("class", "dot")
+      .attr("cx", d => x(d.x))
+      .attr("cy", d => y(d.y))
+      .attr("r", d => d.size)
+      .style("fill", d=>ocolor(d.z))
+      .style("stroke-width", 0) 
+      .on("mouseover", (event, d) => {
+        tooltip.transition().duration(200).style("opacity", 0.9);
+        tooltip.html(`(${d.x},${d.y})`) // Add color to tooltip
+          .style("left", (event.pageX + 5) + "px")
+          .style("top", (event.pageY - 28) + "px");
+      })
+      .on("mouseout", () => {
+        tooltip.transition().duration(500).style("opacity", 0);
+      });
+
+    // Zoom behavior, applied only to the plotArea (data points) and not axes
+    const zoom = d3.zoom()
+      .scaleExtent([1, 10])  // Minimum and maximum zoom scale
+      .translateExtent([[0, 0], [width, height]])  // Restrict panning
+      .on("zoom", (event) => {
+        const transform = event.transform;
+
+        // Rescale the axes based on the zoom
+        const newXScale = transform.rescaleX(x);
+        const newYScale = transform.rescaleY(y);
+
+        // Update the dots with the new scales
+        dots.attr("cx", d => newXScale(d.x))
+            .attr("cy", d => newYScale(d.y));
+
+        // Update the density plot
+        densityGroup.attr("transform", transform);
+
+        // Keep the axes static and re-render them with the new scale
+        xAxisGroup.call(d3.axisBottom(newXScale));
+        yAxisGroup.call(d3.axisLeft(newYScale));
+      });
+
+    // Apply the zoom behavior to the SVG
+    svg.call(zoom);
+  </script>
+
+</body>
+</html>
