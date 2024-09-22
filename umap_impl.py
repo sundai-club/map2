@@ -21,7 +21,8 @@ def load_and_save_embeddings(file_path, save_file_name):
 
     print(df.head())
 
-    texts = [" Company Name: " + str(df['Company'][i]) + " Description: " + str(df['Description'][i]) + " Sector: " + str(df['Sector'][i]) + " Location: " + str(df['Location'][i]) for i in range(len(df))]
+    texts = [" Company Name: " + str(df['name'][i])+" Tagline: "+str(df['tagline'][i])+" Description: " + str(df['description'][i]) for i in range(len(df))]
+    
     print(texts)
     print("\n\n")
     embeddings = convert_to_embeddings(texts)
@@ -34,8 +35,19 @@ def load_and_save_embeddings(file_path, save_file_name):
 
     print("\n\nEmbeddings shape:", f2d_embedding.shape)
     print("\n\nEmbedding Type:", type(f2d_embedding))
+    
+    x = []
+    y = []
 
-    np.save(save_file_name, f2d_embedding)
+    for i in range(len(f2d_embedding)):
+        x.append(f2d_embedding[i][0])
+        y.append(f2d_embedding[i][1])
+    df['X'] = x
+    df['Y'] = y
+
+    df.to_csv(save_file_name, index=True)
+
+    # np.save(save_file_name, f2d_embedding)
     # f2d_embedding = np.load('f2d_embedding.npy')
 
 # # Plot the 2D embeddings
@@ -52,4 +64,4 @@ def retrieve_embeddings(file_path):
     return f2d_embedding
 
 if __name__ == '__main__':
-    load_and_save_embeddings('/Users/anushkasingh/Desktop/Code/hobby-projects/map2/2023-02-27-yc-companies.csv', 'yc_f2d_embedding.npy')
+    load_and_save_embeddings('/Users/anushkasingh/Desktop/Code/hobby-projects/map2/desc_sept_2024_products.csv', 'producthunt_f2d_embedding.csv')
