@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>D3 Scatterplot with Tooltips, Zoom, and Fixed Axes</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -27,33 +26,76 @@
       border-radius: 4px;
       pointer-events: none;
     }
+
+    /* Styling for the data table */
+    #data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    #data-table th, #data-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    #data-table th {
+      background-color: #f2f2f2;
+      font-weight: bold;
+    }
+
+    #data-table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    #data-table tr:hover {
+      background-color: #f5f5f5;
+    }
   </style>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://d3js.org/d3-contour.v2.min.js"></script>
 </head>
 <body>
-
-  <h2>Scatterplot with Density Plot, Tooltips, Zoom, and Fixed Axes</h2>
-  <svg id="scatterplot" width="500" height="400"></svg>
+  <svg id="scatterplot" width="500" height="500"></svg>
+  
+  <!-- Add this table element after the SVG -->
+  <table id="data-table">
+    <thead>
+      <tr>
+        <th>X</th>
+        <th>Y</th>
+        <th>Size</th>
+        <th>Z</th>
+        <th>Shape</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Table body will be populated dynamically -->
+    </tbody>
+  </table>
 
   <script>
     // Set up the dimensions and margins
     const width = 500;
-    const height = 400;
-    const margin = {top: 20, right: 30, bottom: 40, left: 40};
+    const height = 500;
+    const margin = {top: 20, right: 20, bottom: 20, left: 20};
+
 
     // Sample data for the scatterplot
-    const data = [
-      {x: 10, y: 20, size: Math.floor(Math.random() * 10) + 1, z: 3},
-      {x: 20, y: 34, size: Math.floor(Math.random() * 10) + 1, z: 7},
-      {x: 35, y: 45, size: Math.floor(Math.random() * 10) + 1, z: 2},
-      {x: 45, y: 67, size: Math.floor(Math.random() * 10) + 1, z: 9},
-      {x: 55, y: 78, size: Math.floor(Math.random() * 10) + 1, z: 5},
-      {x: 60, y: 90, size: Math.floor(Math.random() * 10) + 1, z: 1},
-      {x: 75, y: 80, size: Math.floor(Math.random() * 10) + 1, z: 8},
-      {x: 85, y: 100, size: Math.floor(Math.random() * 10) + 1, z: 4},
-      {x: 95, y: 120, size: Math.floor(Math.random() * 10) + 1, z: 6}
+    const data = [ //@#$%^
+      {x: 10, y: 20, size: 5, z: 3, w: 2},
+      {x: 20, y: 34, size: 8, z: 7, w: 1},
+      {x: 35, y: 45, size: 3, z: 2, w: 2},
+      {x: 45, y: 67, size: 7, z: 9, w: 2},
+      {x: 55, y: 78, size: 4, z: 5, w: 1},
+      {x: 60, y: 90, size: 6, z: 1, w: 2},
+      {x: 75, y: 80, size: 9, z: 8, w: 2},
+      {x: 85, y: 100, size: 2, z: 4, w: 2},
+      {x: 95, y: 120, size: 5, z: 6, w: 2}
+      //@#$%^
     ];
+
     const ocolor = d3.scaleOrdinal()
       .domain([1, 2, 3, 4, 5, 6, 7, 8, 9])
       .range(d3.schemeCategory10);  // D3's built-in color scheme
@@ -114,25 +156,62 @@
     // Create a group to contain the dots, which will be zoomed
     const plotArea = svg.append("g");
 
-    // Create dots (scatter points)
-    const dots = plotArea.selectAll(".dot")
+    // Function to map w value to shape
+    function getShape(w) {
+      const shapes = {
+        1: d3.symbolCircle,
+        2: d3.symbolCross,
+        3: d3.symbolDiamond,
+        4: d3.symbolSquare,
+        5: d3.symbolStar,
+        6: d3.symbolTriangle,
+        7: d3.symbolWye
+      };
+      
+      return d3.symbol().type(shapes[w] || d3.symbolCircle)();
+    }
+
+    // Create shapes (scatter points)
+    const shapes = plotArea.selectAll(".shape")
       .data(data)
-      .enter().append("circle")
-      .attr("class", "dot")
-      .attr("cx", d => x(d.x))
-      .attr("cy", d => y(d.y))
-      .attr("r", d => d.size)
-      .style("fill", d=>ocolor(d.z))
-      .style("stroke-width", 0) 
+      .enter().append("path")
+      .attr("class", "shape")
+      .attr("d", d => getShape(d.w))
+      .attr("transform", d => `translate(${x(d.x)},${y(d.y)}) scale(${d.size / 5})`)
+      .style("fill", d => ocolor(d.z))
+      .style("stroke-width", 0)
       .on("mouseover", (event, d) => {
         tooltip.transition().duration(200).style("opacity", 0.9);
-        tooltip.html(`(${d.x},${d.y})`) // Add color to tooltip
+        tooltip.html(`(${d.x},${d.y}) - Shape: ${getShapeName(d.w)}`)
           .style("left", (event.pageX + 5) + "px")
           .style("top", (event.pageY - 28) + "px");
       })
       .on("mouseout", () => {
         tooltip.transition().duration(500).style("opacity", 0);
+      })
+      .on("click", (event, d) => {
+        updateTable(d);
       });
+
+    // Function to get shape name
+    function getShapeName(w) {
+      const shapeNames = {
+        1: 'Circle', 2: 'Cross', 3: 'Diamond',
+        4: 'Square', 5: 'Star', 6: 'Triangle', 7: 'Wye'
+      };
+      return shapeNames[w] || 'Circle';
+    }
+
+    // Function to update the table with clicked point data
+    function updateTable(d) {
+      const tableBody = d3.select("#data-table tbody");
+      const row = tableBody.append("tr");
+      row.append("td").text(d.x);
+      row.append("td").text(d.y);
+      row.append("td").text(d.size);
+      row.append("td").text(d.z);
+      row.append("td").text(getShapeName(d.w));
+    }
 
     // Zoom behavior, applied only to the plotArea (data points) and not axes
     const zoom = d3.zoom()
@@ -146,8 +225,7 @@
         const newYScale = transform.rescaleY(y);
 
         // Update the dots with the new scales
-        dots.attr("cx", d => newXScale(d.x))
-            .attr("cy", d => newYScale(d.y));
+        shapes.attr("transform", d => `translate(${newXScale(d.x)},${newYScale(d.y)}) scale(${d.size / 5})`);
 
         // Update the density plot
         densityGroup.attr("transform", transform);

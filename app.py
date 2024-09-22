@@ -9,10 +9,23 @@ st.write("Created as a part of Sundai Hack on 22nd September 2024")
 #Define the 2 columns, chat on left and the graph on right
 # col1, col2 = st.columns([4,6], gap='large')
 
-with open('/Users/anushkasingh/Desktop/Code/hobby-projects/map2/d3-test-code.html', 'r') as file:
+with open('d3-test-code.html', 'r') as file:
     html_code = file.read()
 
-st.components.v1.html(html_code, height=600)
+html_code = html_code.split('//@#$%^')
+assert(len(html_code)==3)
+data_string = """
+      {x: 10, y: 20, size: 5, z: 3, w: 2},
+      {x: 20, y: 34, size: 8, z: 7, w: 1},
+      {x: 35, y: 45, size: 3, z: 2, w: 2},
+      {x: 45, y: 67, size: 7, z: 9, w: 2},
+      {x: 55, y: 78, size: 4, z: 5, w: 1},
+      {x: 60, y: 90, size: 6, z: 1, w: 2},
+      {x: 75, y: 80, size: 9, z: 8, w: 2},
+      {x: 85, y: 100, size: 2, z: 4, w: 2},
+"""
+
+st.components.v1.html(html_code[0]+data_string+html_code[2], height=800)
 
 # st.markdown(
 #     html_code, 
@@ -35,21 +48,6 @@ chart = alt.Chart(df).mark_circle(size=60).encode(
 
 st.altair_chart(chart, use_container_width=True)
 
-st.header("Bokeh Chart")
-
-from bokeh.plotting import figure
-from bokeh.io import output_file, save
-
-df = pd.DataFrame({
-    'UMAP1': [1, 2, 3, 4, 5],
-    'UMAP2': [5, 4, 3, 2, 1],
-    'label': ['A', 'B', 'C', 'D', 'E']
-})
-
-p = figure(title="UMAP Scatter Plot", tools="hover", tooltips="@label")
-p.circle(x='UMAP1', y='UMAP2', source=df, size=10)
-
-st.bokeh_chart(p)
 
 st.header("Plotly Chart")
 import plotly.express as px
