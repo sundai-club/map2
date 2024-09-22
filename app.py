@@ -50,6 +50,7 @@ st.altair_chart(chart, use_container_width=True)
 
 
 st.header("Plotly Chart")
+
 import plotly.express as px
 
 # Create a DataFrame with UMAP results
