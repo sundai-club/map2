@@ -47,5 +47,9 @@ def load_and_save_embeddings(file_path, save_file_name):
 # plt.colorbar()
 # plt.show()
 
+def retrieve_embeddings(file_path):
+    f2d_embedding = np.load(file_path)
+    return f2d_embedding
+
 if __name__ == '__main__':
     load_and_save_embeddings('/Users/anushkasingh/Desktop/Code/hobby-projects/map2/2023-02-27-yc-companies.csv', 'yc_f2d_embedding.npy')

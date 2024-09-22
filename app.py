@@ -1,6 +1,7 @@
 import streamlit as st
-import altair as alt
 import pandas as pd
+import umap_impl
+import numpy as np
 
 # st.set_page_config(layout="wide")
 st.title("Map2 App")
@@ -25,40 +26,53 @@ data_string = """
       {x: 85, y: 100, size: 2, z: 4, w: 2},
 """
 
-st.components.v1.html(html_code[0]+data_string+html_code[2], height=800)
-
 # st.markdown(
 #     html_code, 
 # unsafe_allow_html=True
 # )
 
-st.header("Altair Chart")
+# st.header("Altair Chart")
 
-df = pd.DataFrame({
-    'UMAP1': [1, 2, 3, 4, 5],
-    'UMAP2': [5, 4, 3, 2, 1],
-    'label': ['A', 'B', 'C', 'D', 'E']
-})
+# df = pd.DataFrame({
+#     'UMAP1': [1, 2, 3, 4, 5],
+#     'UMAP2': [5, 4, 3, 2, 1],
+#     'label': ['A', 'B', 'C', 'D', 'E']
+# })
 
-chart = alt.Chart(df).mark_circle(size=60).encode(
-    x='UMAP1',
-    y='UMAP2',
-    tooltip=['label']
-).interactive()
+# chart = alt.Chart(df).mark_circle(size=60).encode(
+#     x='UMAP1',
+#     y='UMAP2',
+#     tooltip=['label']
+# ).interactive()
 
-st.altair_chart(chart, use_container_width=True)
+# st.altair_chart(chart, use_container_width=True)
 
 
-st.header("Plotly Chart")
+# st.header("Plotly Chart")
 
-import plotly.express as px
+# import plotly.express as px
 
-# Create a DataFrame with UMAP results
-df = pd.DataFrame({
-    'UMAP1': [1, 2, 3, 4, 5],
-    'UMAP2': [5, 4, 3, 2, 1],
-    'label': ['A', 'B', 'C', 'D', 'E']
-})
+# # Create a DataFrame with UMAP results
+# df = pd.DataFrame({
+#     'UMAP1': [1, 2, 3, 4, 5],
+#     'UMAP2': [5, 4, 3, 2, 1],
+#     'label': ['A', 'B', 'C', 'D', 'E']
+# })
 
-fig = px.scatter(df, x='UMAP1', y='UMAP2', text='label')
-st.plotly_chart(fig)
+# fig = px.scatter(df, x='UMAP1', y='UMAP2', text='label')
+# st.plotly_chart(fig)
+
+def retrieve_embeddings(file_path):
+    f2d_embedding = np.load(file_path)
+    return f2d_embedding
+
+embedding = retrieve_embeddings('yc_f2d_embedding.npy')
+
+# Parse through and print x & y coordinates of embedding
+data_string = ""
+for point in embedding:
+    x, y = point[0], point[1]
+    data_string = data_string + f"{{x: {x}, y: {y}, size: 5, z: 3, w: 2}},\n"
+
+
+st.components.v1.html(html_code[0]+data_string+html_code[2], height=800)
