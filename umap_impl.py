@@ -21,7 +21,7 @@ def load_and_save_embeddings(file_path, save_file_name):
     data = pd.read_csv(file_path)
 
     # Truncate data to only 200 rows
-    data = data.head(200)
+    # data = data.head(600)
     
     # do some statistical processing
     current_date = pd.Timestamp.now()
