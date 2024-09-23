@@ -32,7 +32,7 @@ def calculate_distance(q_embedding, emb):
     # Get indices of the 10 closest points
     emb = np.column_stack((emb, distances))
     emb = emb[emb[:, 2].argsort()]
-    closest_indices = emb[:10, :2]
+    closest_indices = emb[:100, :2]
     # st.write(closest_indices)
 
     return closest_indices
