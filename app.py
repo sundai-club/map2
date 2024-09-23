@@ -105,7 +105,10 @@ for i in range(len(embedding)):
 
             # {x: 20, y: 34, size: 8, z: 7, w: 1, name: "abe", traction: 24, tagline: "Simplify your workflow", age: "3 years", category: "Fintech"},
     # st.write(embedding[i])
-    # st.write(dd[25])
+    # st.write(dd[14])
+    if type(dd[14]) != str:
+        # st.write(dd[14])
+        dd[14] = ""
     size = int(dd[25]/100.0 * 20)  # Scale traction_rank to size (1-20)
     z = min(int(dd[23] * 9) + 1, 9)  # Scale age_rank to z (1-9)
     w = top_7_slugs.get(dd[14],7)
