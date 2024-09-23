@@ -4,9 +4,9 @@ import umap
 import numpy as np
 
 from sentence_transformers import SentenceTransformer
-from scipy.spatial import distance
+# from scipy.spatial import distance
 import math
-import pyperclip
+# import pyperclip
 
 def convert_to_embeddings(text):
     # Load the Sentence Transformer model
@@ -122,7 +122,7 @@ for i in range(len(embedding)):
 
 # st.write(data_string)
 html_code2 = html_code[0] + data_string + html_code[2]
-pyperclip.copy(html_code2)
+# pyperclip.copy(html_code2)
 
 st.components.v1.html(html_code2, height=800)
 
