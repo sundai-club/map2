@@ -21,7 +21,7 @@ def load_and_save_embeddings(file_path, save_file_name):
 
     print(df.head())
 
-    texts = [" Company Name: " + str(df['name'][i])+" Tagline: "+str(df['tagline'][i])+" Description: " + str(df['description'][i]) for i in range(len(df))]
+    texts = [" Company Name: " + str(df['name'][i])+" Tagline: "+str(df['tagline'][i])+" Description: " + str(df['description'][i] + " Category: "+str(df['topic_name'][i])) for i in range(len(df))]
     
     print(texts)
     print("\n\n")
